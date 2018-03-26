@@ -1,8 +1,8 @@
 module processing_fsm(clock, reset, start_signal, size, done, 
-							buf_0_write_en, buf_1_write_en, error_buf_write_en,
-							buf_0_w_data, buf_1_w_data, error_mem_w_data,
-							buf_0_r_data, buf_1_r_data, error_mem_r_data,
-							buf_0_addr, buf_1_addr, error_mem_addr, buf_sel);
+                            buf_0_write_en, buf_1_write_en, error_buf_write_en,
+                            buf_0_w_data, buf_1_w_data, error_mem_w_data,
+                            buf_0_r_data, buf_1_r_data, error_mem_r_data,
+                            buf_0_addr, buf_1_addr, error_mem_addr, buf_sel);
     input clock;
     input reset;
     input start_signal;
@@ -28,8 +28,8 @@ module processing_fsm(clock, reset, start_signal, size, done,
     output reg buf_sel;
     
     parameter PIXEL_OFFSET = 1'b1, LINE_OFFSET = 9'd256, LINE_MAX = 8'd239, PIXELS_PER_LINE = 9'd256;
-	
-	parameter MAX_ADDRESS = 18'd61439;
+    
+    parameter MAX_ADDRESS = 18'd61439;
     
     // State Assignments
     parameter
@@ -53,7 +53,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
         DONE              = 5'b10001;
 
     // Pixel registers
-	reg [7:0] nw_pixel;
+    reg [7:0] nw_pixel;
     reg [7:0] n_pixel;
     reg [7:0] ne_pixel;
     reg [7:0] w_pixel;
@@ -110,25 +110,25 @@ module processing_fsm(clock, reset, start_signal, size, done,
     reg from_buf_se;
     
     // Logic for max value assignments
-	assign pixel_max = 	(size == 2'b10) ? 63 :
-						(size == 2'b01) ? 31 :
-										  15 ;
-	
-	assign packet_max =	(size == 2'b10) ? 3 :
-						(size == 2'b01) ? 7 :
-									     15 ;
-	
-	// Logic that determines if we are the the top, bottom, left, 
+    assign pixel_max =  (size == 2'b10) ? 63 :
+                        (size == 2'b01) ? 31 :
+                                          15 ;
+    
+    assign packet_max = (size == 2'b10) ? 3 :
+                        (size == 2'b01) ? 7 :
+                                         15 ;
+    
+    // Logic that determines if we are the the top, bottom, left, 
     // or right edges of the frame.
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			at_top = 0;
-			at_bottom = 0;
-			at_left = 0;
-			at_right = 0;
-		end
-		else begin
-			case(state)
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            at_top = 0;
+            at_bottom = 0;
+            at_left = 0;
+            at_right = 0;
+        end
+        else begin
+            case(state)
                 CHECK_PACKET_ERR: begin
                     // If we are at the top of the frame
                     if (line_count == 0) begin
@@ -169,21 +169,21 @@ module processing_fsm(clock, reset, start_signal, size, done,
                     at_left = at_left;
                     at_right = at_right;
                 end
-			endcase
-		end	
-	end
+            endcase
+        end 
+    end
 
-	// Check to see if we are at the edge of a packet.
+    // Check to see if we are at the edge of a packet.
     // If we are at the edge of a packet we will need
     // to check error flags for adjacent packets.
     always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			error_line_offset_w <= 1'b0;
-			error_line_offset_e <= 1'b0;
-		end
-		else begin
-			case(state)
-				CHECK_PACKET_ERR: begin
+        if(!reset) begin
+            error_line_offset_w <= 1'b0;
+            error_line_offset_e <= 1'b0;
+        end
+        else begin
+            case(state)
+                CHECK_PACKET_ERR: begin
                     // Check to see if current packet is in error. If it is we 
                     // need to check error bit of adjacent pixels, if it isn't
                     // then we doent need to do any of this.
@@ -210,21 +210,21 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         error_line_offset_e <= 1'b0;
                     end
                 end
-				default: begin
+                default: begin
                     error_line_offset_w <= error_line_offset_w;
                     error_line_offset_e <= error_line_offset_e;
-				end
-			endcase
-		end
-	end
+                end
+            endcase
+        end
+    end
 
-	// Logic that determines the address to access for the current pixel
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			pixel_address <= 0;
-		end
-		else begin
-			case(state)
+    // Logic that determines the address to access for the current pixel
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            pixel_address <= 0;
+        end
+        else begin
+            case(state)
                 // If in the wait state just reset to 0
                 WAIT: begin
                     pixel_address <= 0;
@@ -239,25 +239,25 @@ module processing_fsm(clock, reset, start_signal, size, done,
                 default: begin
                     pixel_address <= pixel_address;
                 end
-			endcase
-		end	
-	end
-	
+            endcase
+        end 
+    end
+    
     // Logic to read from various pixels.
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			nw_pixel <= 0;
-			n_pixel <= 0;
-			ne_pixel <= 0;
-			w_pixel <= 0;
-			e_pixel <= 0;
-			sw_pixel <= 0;
-			s_pixel <= 0;
-			se_pixel <= 0;
-		end
-		else begin
-			case(state)
-				WEST_PIXEL:	begin
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            nw_pixel <= 0;
+            n_pixel <= 0;
+            ne_pixel <= 0;
+            w_pixel <= 0;
+            e_pixel <= 0;
+            sw_pixel <= 0;
+            s_pixel <= 0;
+            se_pixel <= 0;
+        end
+        else begin
+            case(state)
+                WEST_PIXEL: begin
                     if (from_buf_nw) begin
                         nw_pixel <= buf_1_r_data;
                     end
@@ -265,7 +265,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         nw_pixel <= buf_0_r_data;
                     end
                 end
-				EAST_PIXEL:	begin
+                EAST_PIXEL: begin
                     if (from_buf_n) begin
                         n_pixel <= buf_1_r_data;
                     end
@@ -273,7 +273,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         n_pixel <= buf_0_r_data;
                     end
                 end
-				SW_PIXEL: begin
+                SW_PIXEL: begin
                     if (from_buf_ne) begin
                         ne_pixel <= buf_1_r_data;
                     end
@@ -281,7 +281,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         ne_pixel <= buf_0_r_data;
                     end
                 end
-				SOUTH_PIXEL: begin
+                SOUTH_PIXEL: begin
                     if (from_buf_w) begin
                         w_pixel <= buf_1_r_data;
                     end
@@ -289,7 +289,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         w_pixel <= buf_0_r_data;
                     end
                 end
-				SE_PIXEL: begin
+                SE_PIXEL: begin
                     if (from_buf_e) begin
                         e_pixel <= buf_1_r_data;
                     end
@@ -297,7 +297,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         e_pixel <= buf_0_r_data;
                     end
                 end
-				MEM_WAIT_1: begin
+                MEM_WAIT_1: begin
                     if (from_buf_sw) begin
                         sw_pixel <= buf_1_r_data;
                     end
@@ -321,7 +321,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         se_pixel <= buf_0_r_data;
                     end
                 end
-				default: begin
+                default: begin
                     nw_pixel <= nw_pixel;
                     n_pixel <= n_pixel;
                     ne_pixel <= ne_pixel;
@@ -331,20 +331,20 @@ module processing_fsm(clock, reset, start_signal, size, done,
                     s_pixel <= s_pixel;
                     se_pixel <= se_pixel;
                 end
-			endcase
-		end
-	end
-	
+            endcase
+        end
+    end
+    
     // Logic to create the sum and average from the read in pixel values.
     // Takes into consideration corner cases where some pixels may not be
     // available to average (i.e. At the frame edge or corner).
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			sum <= 0;
-		end
-		else begin
-			case(state)
-				SUM: begin
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            sum <= 0;
+        end
+        else begin
+            case(state)
+                SUM: begin
                     if (at_top && at_left) begin
                         sum <= (e_pixel + e_pixel + se_pixel + se_pixel + s_pixel + s_pixel + e_pixel + s_pixel) >> 3;
                     end
@@ -373,29 +373,29 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         sum <= (nw_pixel + n_pixel + ne_pixel + w_pixel + e_pixel + sw_pixel + s_pixel + se_pixel) >> 3; 
                     end
                 end
-				default: begin
+                default: begin
                     sum <= sum;
                 end
-			endcase
-		end
-	end
-	
+            endcase
+        end
+    end
+    
     // Logic to keep track of the pixel, packet, and line counters. 
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			line_count <= 0;
-			packet_count <= 0;
-			pixel_count <= 0;
-		end
-		else begin
-			case(state)
-				WAIT: begin
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            line_count <= 0;
+            packet_count <= 0;
+            pixel_count <= 0;
+        end
+        else begin
+            case(state)
+                WAIT: begin
                     // Reset counters
                     pixel_count <= 0;
                     packet_count <= 0;
                     line_count <= 0;
                 end
-				CHECK_PACKET_ERR: begin
+                CHECK_PACKET_ERR: begin
                     if(err_buf_mid[15-packet_count] == 1) begin
                         pixel_count <= pixel_count;
                         packet_count <= packet_count;
@@ -421,7 +421,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				WRITE_RESULT: begin
+                WRITE_RESULT: begin
                         if (pixel_count == pixel_max) begin
                             pixel_count <= 0;
                             if (packet_count == packet_max) begin
@@ -444,32 +444,32 @@ module processing_fsm(clock, reset, start_signal, size, done,
                             line_count <= line_count;
                         end
                     end
-				DONE: begin
+                DONE: begin
                     line_count <= 0;
                     packet_count <= 0;
                     pixel_count <= 0;
                 end
-				default: begin
+                default: begin
                     line_count <= line_count;
                     packet_count <= packet_count;
                     pixel_count <= pixel_count;
                 end
-			endcase
-		end
-	end
-	
+            endcase
+        end
+    end
+    
     // Logic to write result to relevent pixel buffers.
-	always @(posedge clock, negedge reset)
-	begin
-		if(!reset) begin
-			buf_0_w_data <= 0;
-			buf_0_write_en <= 0;
-			buf_1_w_data <= 0;
-			buf_1_write_en <= 0;
-		end
-		else begin
-			case(state)
-				WRITE_RESULT: begin
+    always @(posedge clock, negedge reset)
+    begin
+        if(!reset) begin
+            buf_0_w_data <= 0;
+            buf_0_write_en <= 0;
+            buf_1_w_data <= 0;
+            buf_1_write_en <= 0;
+        end
+        else begin
+            case(state)
+                WRITE_RESULT: begin
                     // Write the result of sum into the relevant buffers.
                     if (buf_sel) begin
                         buf_1_w_data <= sum;
@@ -480,55 +480,55 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         buf_0_write_en <= 1;
                     end
                 end
-				default: begin
+                default: begin
                     buf_0_w_data <= buf_0_w_data;
                     buf_0_write_en <= 0;
                     buf_1_w_data <= buf_1_w_data;
                     buf_1_write_en <= 0;
                 end
-			endcase
-		end
-	end
-	
-	// Logic to set done signals high, indicating we are
+            endcase
+        end
+    end
+    
+    // Logic to set done signals high, indicating we are
     // done processing the frame.
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			buf_sel <= 0;
-			done <= 0;
-		end
-		else begin
-			case(state)
-				DONE: begin
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            buf_sel <= 0;
+            done <= 0;
+        end
+        else begin
+            case(state)
+                DONE: begin
                     buf_sel <= ~buf_sel;
                     done <= 1;
                 end
-				default: begin
+                default: begin
                     buf_sel <= buf_sel;
                     done <= 0;
                 end
-			endcase
-		end
-	end
+            endcase
+        end
+    end
  
     // Logic that determines the addresses of the buffers we are addressing
     // for pixel value reads.
-	always @(posedge clock, negedge reset) begin
-		if(!reset) begin
-			buf_0_addr <= 16'b0;
-			buf_1_addr <= 16'b0;
-			from_buf_nw <= 1'b0;
-			from_buf_n <= 1'b0;
-			from_buf_ne <= 1'b0;
-			from_buf_w <= 1'b0;
-			from_buf_e <= 1'b0;
-			from_buf_sw <= 1'b0;
-			from_buf_s <= 1'b0;
-			from_buf_se <= 1'b0;
-		end
-		else begin
-			case(state)
-				NW_PIXEL: begin
+    always @(posedge clock, negedge reset) begin
+        if(!reset) begin
+            buf_0_addr <= 16'b0;
+            buf_1_addr <= 16'b0;
+            from_buf_nw <= 1'b0;
+            from_buf_n <= 1'b0;
+            from_buf_ne <= 1'b0;
+            from_buf_w <= 1'b0;
+            from_buf_e <= 1'b0;
+            from_buf_sw <= 1'b0;
+            from_buf_s <= 1'b0;
+            from_buf_se <= 1'b0;
+        end
+        else begin
+            case(state)
+                NW_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_top[15-(packet_count - error_line_offset_w)]) begin
                             buf_0_addr <= buf_0_addr;
@@ -554,7 +554,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				NORTH_PIXEL: begin
+                NORTH_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_top[15-packet_count]) begin
                             buf_1_addr <= pixel_address - LINE_OFFSET;
@@ -580,7 +580,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				NE_PIXEL: begin
+                NE_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_top[15-(packet_count - error_line_offset_w)]) begin
                             buf_1_addr <= pixel_address + PIXEL_OFFSET - LINE_OFFSET;
@@ -606,7 +606,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				WEST_PIXEL: begin
+                WEST_PIXEL: begin
                     if (buf_sel == 0) begin
                         buf_1_addr <= pixel_address - PIXEL_OFFSET;
                         buf_0_addr <= buf_0_addr;
@@ -618,7 +618,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         from_buf_w <= 1'b0;
                     end
                 end
-				EAST_PIXEL: begin
+                EAST_PIXEL: begin
                     if (buf_sel == 0) begin
                         buf_1_addr <= pixel_address + PIXEL_OFFSET;
                         buf_0_addr <= buf_1_addr;
@@ -630,7 +630,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         from_buf_e <= 1'b0;
                     end
                 end
-				SW_PIXEL: begin
+                SW_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_btm[15 - (packet_count - error_line_offset_w)]) begin
                             buf_1_addr <= pixel_address - PIXEL_OFFSET + LINE_OFFSET;
@@ -656,7 +656,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				SOUTH_PIXEL: begin
+                SOUTH_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_btm[15-packet_count]) begin
                             buf_1_addr <= pixel_address + LINE_OFFSET;
@@ -682,7 +682,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				SE_PIXEL: begin
+                SE_PIXEL: begin
                     if (buf_sel == 0) begin
                         if (err_buf_btm[15-(packet_count + error_line_offset_e)]) begin
                             buf_1_addr <= pixel_address + PIXEL_OFFSET + LINE_OFFSET;
@@ -708,7 +708,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
                         end
                     end
                 end
-				default: begin
+                default: begin
                     buf_0_addr <= buf_0_addr;
                     buf_1_addr <= buf_1_addr;
                     from_buf_nw <= from_buf_nw;
@@ -720,9 +720,9 @@ module processing_fsm(clock, reset, start_signal, size, done,
                     from_buf_s <= from_buf_s;
                     from_buf_se <= from_buf_se;
                 end
-			endcase
-		end
-	end
+            endcase
+        end
+    end
     
     // Logic that loads the error buffers. 
     always @(posedge clock, negedge reset)
@@ -792,7 +792,7 @@ module processing_fsm(clock, reset, start_signal, size, done,
 
     // Next state logic. See documentation for state transitions and 
     // descriptions.
-	always @ (posedge clock, negedge reset) begin
+    always @ (posedge clock, negedge reset) begin
         if(!reset) begin
             state <= WAIT;
         end
